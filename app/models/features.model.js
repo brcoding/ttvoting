@@ -5,6 +5,8 @@ module.exports = mongoose => {
       {
         title: String,
         description: String,
+        votes: [ String ],
+        comments: [{ body: String, date: Date, ipaddress: String }],
         published: Boolean
       },
       { timestamps: true }
