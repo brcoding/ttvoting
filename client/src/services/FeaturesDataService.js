@@ -13,6 +13,10 @@ class FeaturesDataService {
     return http.post("/features", data);
   }
 
+  vote(id) {
+    return http.put(`/features/vote/${id}`);
+  }
+
   update(id, data) {
     return http.put(`/features/${id}`, data);
   }

@@ -14,6 +14,8 @@ exports.create = (req, res) => {
   const features = new Features({
     title: req.body.title,
     description: req.body.description,
+    voting: [],
+    comments: [],
     published: req.body.published ? req.body.published : false
   });
 
@@ -61,6 +63,51 @@ exports.findOne = (req, res) => {
         .status(500)
         .send({ message: "Error retrieving Feature with id=" + id });
     });
+};
+
+exports.vote = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update can not be empty!"
+    });
+  }
+
+  const id = req.params.id;
+
+  Features.findById(id)
+    .then(data => {
+      if (!data)
+        res.status(404).send({ message: "Not found Feature with id " + id });
+      else { 
+          console.log(req.ip);
+          if (data.votes.includes(req.ip)) {
+            return res.status(409).send({ message: "Already voted for that feature" });
+          }
+          data.votes.push(req.ip);
+          console.log(data);
+          Features.findByIdAndUpdate(id, data, { useFindAndModify: false })
+            .then(data => {
+              if (!data) {
+                res.status(404).send({
+                  message: `Cannot update Feature with id=${id}. Maybe Feature was not found!`
+                });
+              } else res.send({ message: "Feature was updated successfully." });
+            })
+            .catch(err => {
+              res.status(500).send({
+                message: "Error updating Feature with id=" + id
+              });
+            });
+        }
+
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Feature with id=" + id });
+    });
+
+
 };
 
 exports.update = (req, res) => {

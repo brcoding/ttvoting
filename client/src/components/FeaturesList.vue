@@ -20,9 +20,9 @@
           :class="{ active: index == currentIndex }"
           v-for="(feature, index) in features"
           :key="index"
-          @click="setActiveFeature(feature, index)"
+          
         >
-          {{ feature.title }}
+          <span @click="setActiveFeature(feature, index)">{{ feature.title }} - Votes: {{ feature.votes.length }} </span> <img height="30" src="../assets/plus1.png" @click="voteFeature(feature._id)" />
         </li>
       </ul>
 
@@ -33,6 +33,9 @@
     <div class="col-md-6">
       <div v-if="currentFeature">
         <h4>Feature</h4>
+        <div>
+          <label><strong>Votes:</strong></label> {{ currentFeature.votes.length }}
+        </div>
         <div>
           <label><strong>Title:</strong></label> {{ currentFeature.title }}
         </div>
@@ -85,8 +88,21 @@ export default {
       this.currentFeature = null;
       this.currentIndex = -1;
     },
-    setActiveFeature(tutorial, index) {
-      this.currentFeature = tutorial;
+    voteFeature(id) {
+      FeaturesDataService.vote(id).then(voteresp => {
+        console.log(voteresp);
+        FeaturesDataService.findByTitle(this.title)
+          .then(response => {
+            this.features = response.data;
+            console.log(response.data);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      });
+    },
+    setActiveFeature(feature, index) {
+      this.currentFeature = feature;
       this.currentIndex = index;
     },
     removeAllFeatures() {
