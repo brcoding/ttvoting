@@ -17,6 +17,11 @@ class FeaturesDataService {
     return http.put(`/features/vote/${id}`);
   }
 
+  comment(id, comment) {
+    console.log(comment);
+    return http.post(`/features/comment/${id}`, comment);
+  }
+
   update(id, data) {
     return http.put(`/features/${id}`, data);
   }

@@ -21,6 +21,9 @@ module.exports = app => {
   // Update a Tutorial with id
   router.put("/vote/:id", features.vote);
 
+  // Update a Tutorial with id
+  router.post("/comment/:id", features.comment);
+
   // Delete a Tutorial with id
   router.delete("/:id", features.delete);
 
