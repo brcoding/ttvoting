@@ -2,6 +2,13 @@
 const db = require("../models");
 const Features = db.features;
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 exports.create = (req, res) => {
   // Validate request
   console.log(req.body);
@@ -63,6 +70,73 @@ exports.findOne = (req, res) => {
         .status(500)
         .send({ message: "Error retrieving Feature with id=" + id });
     });
+};
+
+exports.comment = (req, res) => {
+  // Validate request
+  console.log(req.body);
+  if (!req.body.comment) {
+    res.status(400).send({ message: "Content can not be empty!" });
+    return;
+  }
+  //{ body: String, date: Date, ipaddress: String, votes: [String]}
+  const comment = {id: uuidv4(), body: req.body.comment, date: Date.now(), ipaddress: req.ip, votes: [req.ip]}
+  const id = req.params.id;
+
+  Features.findById(id)
+    .then(data => {
+      if (!data)
+        res.status(404).send({ message: "Not found Feature with id " + id });
+      else { 
+          console.log(req.ip);
+          // if (data.votes.includes(req.ip)) {
+          //   return res.status(409).send({ message: "Already voted for that feature" });
+          // }
+          data.comments.push(comment);
+          console.log("New Comment: " + JSON.stringify(data));
+          Features.findByIdAndUpdate(id, data, { useFindAndModify: false })
+            .then(data => {
+              if (!data) {
+                res.status(404).send({
+                  message: `Cannot update Feature with id=${id}. Maybe Feature was not found!`
+                });
+              } else res.send({ message: "Feature was updated successfully." });
+            })
+            .catch(err => {
+              res.status(500).send({
+                message: "Error updating Feature with id=" + id
+              });
+            });
+        }
+
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Feature with id=" + id });
+    });
+
+  // // Create a Feature
+  // const features = new Features({
+  //   title: req.body.title,
+  //   description: req.body.description,
+  //   voting: [],
+  //   comments: [],
+  //   published: req.body.published ? req.body.published : false
+  // });
+
+  // Save features in the database
+  // features
+  //   .save(features)
+  //   .then(data => {
+  //     res.send(data);
+  //   })
+  //   .catch(err => {
+  //     res.status(500).send({
+  //       message:
+  //         err.message || "Some error occurred while creating the Features."
+  //     });
+  //   });
 };
 
 exports.vote = (req, res) => {

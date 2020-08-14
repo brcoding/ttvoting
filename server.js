@@ -5,7 +5,7 @@ const cors = require("cors");
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8080"
+  origin: ["http://66.175.216.67", "http://localhost:8080"]
 };
 
 const db = require("./app/models");
